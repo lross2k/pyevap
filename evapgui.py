@@ -25,7 +25,7 @@ class Evap:
         self.gen_input_frame()
         self.gen_main_frame()
         self.main_frame.pack()
-        self.get_test_data()
+        self.spreadsheet_data = {}
 
     def run(self):
         self.raise_main_menu()
@@ -87,6 +87,7 @@ class Evap:
         self.main_frame.rowconfigure(1, weight=1)
         self.main_frame.columnconfigure(0, weight=1)
         customtkinter.CTkButton(self.main_frame, text='Ttes', command=self.check_saved_data).grid(row=2, column=0, columnspan=2)
+        customtkinter.CTkButton(self.main_frame, text='Load data', command=self.get_test_data).grid(row=3, column=0, columnspan=2)
 
     def new_input_row(self, frame, row, variable, units):
         customtkinter.CTkLabel(frame, text=variable, padx=10, pady=10).grid(row=row, column=0)
@@ -108,11 +109,14 @@ class Evap:
     def raise_input(self):
         self.main_frame.pack_forget()
         self.input_frame.pack()
-    
+
     def get_test_data(self):
         ''' Obtains data from file selected by user in the openfiledialog '''
         file = customtkinter.filedialog.askopenfilename(title='Abrir archivo con datos', 
             filetypes=[('Excel', '*.xlsx'), ('Excel macros', '*.xlsm'), ('CSV', '*.csv')])
+        if not file:
+            print('Empty file handle')
+            return
         wb = openpyxl.load_workbook(file)
         ws = wb.active if 'Datos' not in wb.get_sheet_names() else wb.get_sheet_by_name('Datos')
         self.spreadsheet_data = {}
@@ -121,7 +125,7 @@ class Evap:
         for col in ws.rows:
             for index in range(len(self.spreadsheet_data.keys())):
                 self.spreadsheet_data[list(self.spreadsheet_data.keys())[index]].append(col[index].value)
-    
+
     def check_saved_data(self):
         print(self.spreadsheet_data.keys())
         for index, item in self.spreadsheet_data.items():
