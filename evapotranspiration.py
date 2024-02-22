@@ -46,7 +46,7 @@ def load_data(file: str) -> SoilData:
     ws: openpyxl.worksheet.worksheet.Worksheet = wb['Datos']
     spreadsheet_data: SoilData = {'date': [], 'H': [], 'TA': [], 'HR': [], 'VV': [], 'RS': [], 'PR': []}
     if ws:
-        for row in ws.iter_rows(min_row=1):
+        for row in ws.iter_rows(min_row=2):
             spreadsheet_data['date'].append(cast(Any, row[0].value))
             spreadsheet_data['H'].append(cast(Any, row[1].value))
             spreadsheet_data['TA'].append(float(cast(Any, row[2].value)))
