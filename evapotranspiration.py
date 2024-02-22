@@ -1,5 +1,5 @@
 import openpyxl
-from typing import TypedDict, Sequence
+from typing import TypedDict, Sequence, Any, cast
 from collections import defaultdict
 from datetime import datetime, time
 from math import fsum, log, exp, cos, pi, sin, acos, tan, sqrt
@@ -43,17 +43,17 @@ def values_for_variable(variable_data: Sequence[float]) -> dict[str, float]:
 
 def load_data(file: str) -> SoilData:
     wb = openpyxl.load_workbook(file)
-    ws = wb.active if 'Datos' not in wb.sheetnames else wb['Datos']
+    ws: openpyxl.worksheet.worksheet.Worksheet = wb['Datos']
     spreadsheet_data: SoilData = {'date': [], 'H': [], 'TA': [], 'HR': [], 'VV': [], 'RS': [], 'PR': []}
     if ws:
-        for row in list(ws.rows)[1:]:
-            spreadsheet_data['date'].append(row[0].value)
-            spreadsheet_data['H'].append(row[1].value)
-            spreadsheet_data['TA'].append(float(row[2].value))
-            spreadsheet_data['HR'].append(row[3].value)
-            spreadsheet_data['VV'].append(float(row[4].value))
-            spreadsheet_data['RS'].append(row[5].value)
-            spreadsheet_data['PR'].append(float(row[6].value))
+        for row in ws.iter_rows(min_row=1):
+            spreadsheet_data['date'].append(cast(Any, row[0].value))
+            spreadsheet_data['H'].append(cast(Any, row[1].value))
+            spreadsheet_data['TA'].append(float(cast(Any, row[2].value)))
+            spreadsheet_data['HR'].append(cast(Any, row[3].value))
+            spreadsheet_data['VV'].append(float(cast(Any, row[4].value)))
+            spreadsheet_data['RS'].append(cast(Any, row[5].value))
+            spreadsheet_data['PR'].append(float(cast(Any, row[6].value)))
     return(spreadsheet_data)
 
 def calculate_wind_velocity(vv_avg: float, constants: dict[str, float]) -> float:
