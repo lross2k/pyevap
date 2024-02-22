@@ -87,7 +87,7 @@ def run_scenario(start_date: dict[str, int], end_date: dict[str, int], data: Soi
     indexed_data = index_by_date(data['date'])
 
     amount_of_days = 0
-    prev_ta_avg = 0
+    prev_ta_avg: float = 0
 
     for year in range(start_date['year'], end_date['year'] + 1):
         for month in range(start_date['month'], end_date['month'] + 1):

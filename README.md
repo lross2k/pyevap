@@ -14,4 +14,11 @@ python -m venv .
 ```bash
 ./bin/pip install customtkinter
 ./bin/pip install openpyxl
+./bin/pip install mypy
+```
+
+# Type checking
+
+```bash
+./bin/mypy --ignore-missing-imports --strict FILE
 ```
