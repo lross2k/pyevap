@@ -1,5 +1,7 @@
 import customtkinter
 import openpyxl
+from calculations import run_scenario
+from evapotranspiration import load_data
 
 # class  
 
@@ -87,7 +89,40 @@ class Evap:
         self.main_frame.rowconfigure(1, weight=1)
         self.main_frame.columnconfigure(0, weight=1)
         customtkinter.CTkButton(self.main_frame, text='Ttes', command=self.check_saved_data).grid(row=2, column=0, columnspan=2)
+        customtkinter.CTkButton(self.main_frame, text='Calculate', command=self.run_scenario_example).grid(row=4, column=1, columnspan=2)
         customtkinter.CTkButton(self.main_frame, text='Load data', command=self.get_test_data).grid(row=3, column=0, columnspan=2)
+
+    def run_scenario_example(self):
+        constants = {
+            'measure_height_c': 6.5,
+            'latitude_rad_c': 0.173,
+            'max_point_c': 12,
+            'centre_logitude_deg_c': 90,
+            'longitude_deg_c': 83.9,
+            'solar_c': 0.082,
+            'height_c': 2129,
+            'albedo_c': 0.23,
+            'steffan_c': (4.903*10**(-9))/24,
+            'caloric_capacity_c': 2.1,
+            'soil_depth_c': 0.1,
+            'psicrometric_c': 0.05
+        }
+
+        start_date = {
+            'month': 12,
+            'day': 1,
+            'year': 2019
+        }
+
+        end_date = {
+            'month': 12,
+            'day': 3,
+            'year': 2019
+        }
+
+        data = self.spreadsheet_data
+
+        run_scenario(start_date, end_date, data, constants)
 
     def new_input_row(self, frame, row, variable, units):
         customtkinter.CTkLabel(frame, text=variable, padx=10, pady=10).grid(row=row, column=0)
@@ -117,14 +152,7 @@ class Evap:
         if not file:
             print('Empty file handle')
             return
-        wb = openpyxl.load_workbook(file)
-        ws = wb.active if 'Datos' not in wb.get_sheet_names() else wb.get_sheet_by_name('Datos')
-        self.spreadsheet_data = {}
-        for col in ws['A1:G1'][0]:
-            self.spreadsheet_data[col.value] = []
-        for col in ws.rows:
-            for index in range(len(self.spreadsheet_data.keys())):
-                self.spreadsheet_data[list(self.spreadsheet_data.keys())[index]].append(col[index].value)
+        self.spreadsheet_data = load_data(file)
 
     def check_saved_data(self):
         print(self.spreadsheet_data.keys())

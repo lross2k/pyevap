@@ -3,3 +3,7 @@
 __pycache__/
 .vscode/
 .mypy_cache
+bin/
+lib/
+lib64
+pyvenv.cfg
