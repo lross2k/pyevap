@@ -3,8 +3,6 @@ import openpyxl
 from calculations import run_scenario
 from evapotranspiration import load_data, SoilData
 
-# class  
-
 class Evap:
 
     def __init__(self) -> None:
@@ -18,6 +16,16 @@ class Evap:
         # customtkinter.deactivate_automatic_dpi_awareness()
         # customtkinter.set_widget_scaling(float_value)  # widget dimensions and text size
         # customtkinter.set_window_scaling(float_value)  # window geometry dimensions
+
+        self.height_value: int           = 2129
+        self.albedo_value: float           = 0.23
+        self.solar_value: float            = 0.082
+        self.meassure_height_value: float  = 6.5
+
+        self.height_entry           = None
+        self.albedo_entry           = None
+        self.solar_entry            = None
+        self.meassure_height_entry  = None
 
         self.TKroot = customtkinter.CTk()
         self.TKroot.geometry("800x600")
@@ -40,27 +48,28 @@ class Evap:
         # Values that must be entered by the user
         customtkinter.CTkLabel(input_frame, text='Input Page').grid(row=2, column=0, columnspan=2)
         left_localization_data = customtkinter.CTkFrame(input_frame, width=500)
-        self.new_input_row(left_localization_data, 1, 'Altura', 'msnm')
-        self.new_input_row(left_localization_data, 2, 'Albedo', '-')
-        self.new_input_row(left_localization_data, 3, 'Constante Solar', 'MJ/m^2 min')
-        self.new_input_row(left_localization_data, 4, 'Altura de medición', 'm')
+        self.height_entry = self.new_input_row(left_localization_data, 1, 'Altura', 'msnm', str(self.height_value))
+        self.albedo_entry = self.new_input_row(left_localization_data, 2, 'Albedo', '-', str(self.albedo_value))
+        self.solar_entry = self.new_input_row(left_localization_data, 3, 'Constante Solar', 'MJ/m^2 min', str(self.solar_value))
+        self.meassure_height_entry = self.new_input_row(left_localization_data, 4, 'Altura de medición', 'm', str(self.meassure_height_value))
+        print("just defined", self.meassure_height_entry.get())
         left_localization_data.grid(row=3, column=0)
 
         right_localization_data = customtkinter.CTkFrame(input_frame)
-        self.new_input_row(right_localization_data, 1, 'Altura', 'msnm')
-        self.new_input_row(right_localization_data, 2, 'Albedo', '-')
-        self.new_input_row(right_localization_data, 3, 'Constante Solar', 'MJ/m^2 min')
+        self.new_input_row(right_localization_data, 1, 'Altura', 'msnm', "TODO")
+        self.new_input_row(right_localization_data, 2, 'Albedo', '-', "TODO")
+        self.new_input_row(right_localization_data, 3, 'Constante Solar', 'MJ/m^2 min', "TODO")
         right_localization_data.grid(row=3, column=1)
 
         # Values defined from other values
         customtkinter.CTkLabel(input_frame, text='Valores calculados').grid(row=4, column=0, columnspan=2)
 
         left_calculated_data = customtkinter.CTkFrame(input_frame)
-        self.new_input_row(left_calculated_data, 1, 'Presión Atmosférica', 'kPa')
+        self.new_input_row(left_calculated_data, 1, 'Presión Atmosférica', 'kPa', "TODO")
         left_calculated_data.grid(row=5, column=0)
 
         right_calculated_data = customtkinter.CTkFrame(input_frame)
-        self.new_input_row(right_calculated_data, 2, 'Constante psicrométrica (ϒ)', 'kPa /°C')
+        self.new_input_row(right_calculated_data, 2, 'Constante psicrométrica (ϒ)', 'kPa /°C', "TODO")
         right_calculated_data.grid(row=5, column=1)
 
         # Values related to location
@@ -94,15 +103,24 @@ class Evap:
         return main_frame
 
     def run_scenario_example(self) -> None:
+        if self.meassure_height_entry.get():
+            self.meassure_height_value = float(self.meassure_height_entry.get())
+        if self.height_entry.get():
+            self.height_value = int(self.height_entry.get())
+        if self.albedo_entry.get():
+            self.albedo_value = float(self.albedo_entry.get())
+        if self.solar_entry.get():
+            self.solar_value = float(self.solar_entry.get())
+
         constants = {
-            'measure_height_c': 6.5,
+            'measure_height_c': self.meassure_height_value,
             'latitude_rad_c': 0.173,
             'max_point_c': 12,
             'centre_logitude_deg_c': 90,
             'longitude_deg_c': 83.9,
-            'solar_c': 0.082,
-            'height_c': 2129,
-            'albedo_c': 0.23,
+            'solar_c': self.solar_value,
+            'height_c': self.height_value,
+            'albedo_c': self.albedo_value,
             'steffan_c': (4.903*10**(-9))/24,
             'caloric_capacity_c': 2.1,
             'soil_depth_c': 0.1,
@@ -125,21 +143,27 @@ class Evap:
 
         run_scenario(start_date, end_date, data, constants)
 
-    def new_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str, units: str) -> customtkinter.CTkEntry:
+    def new_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str, units: str, placeholder: str) -> customtkinter.CTkEntry:
         ''' Returns the handle to data entry that was created for the input row '''
         customtkinter.CTkLabel(frame, text=variable, padx=10, pady=10).grid(row=row, column=0)
-        entry = customtkinter.CTkEntry(frame, placeholder_text="valor").grid(row=row, column=1, columnspan=2)
+        entry = customtkinter.CTkEntry(frame, placeholder_text=placeholder)
+        entry.grid(row=row, column=1, columnspan=2)
         customtkinter.CTkLabel(frame, text=units, padx=10, pady=10).grid(row=row, column=3)
         return entry
     
     def new_location_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str) -> list[customtkinter.CTkEntry]:
         ''' Returns the handle to 5 data entries that were created for the input row '''
         customtkinter.CTkLabel(frame, text=variable, padx=5, pady=10).grid(row=row, column=0)
-        entry1 = customtkinter.CTkEntry(frame, placeholder_text="valor").grid(row=row, column=1)
-        entry2 = customtkinter.CTkEntry(frame, placeholder_text="valor").grid(row=row, column=2)
-        entry3 = customtkinter.CTkEntry(frame, placeholder_text="valor").grid(row=row, column=3)
-        entry4 = customtkinter.CTkEntry(frame, placeholder_text="valor").grid(row=row, column=4)
-        entry5 = customtkinter.CTkEntry(frame, placeholder_text="valor").grid(row=row, column=5)
+        entry1 = customtkinter.CTkEntry(frame, placeholder_text="valor")
+        entry2 = customtkinter.CTkEntry(frame, placeholder_text="valor")
+        entry3 = customtkinter.CTkEntry(frame, placeholder_text="valor")
+        entry4 = customtkinter.CTkEntry(frame, placeholder_text="valor")
+        entry5 = customtkinter.CTkEntry(frame, placeholder_text="valor")
+        entry1.grid(row=row, column=1)
+        entry2.grid(row=row, column=2)
+        entry3.grid(row=row, column=3)
+        entry4.grid(row=row, column=4)
+        entry5.grid(row=row, column=5)
         return [entry1, entry2, entry3, entry4, entry5]
 
     def raise_main_menu(self) -> None:

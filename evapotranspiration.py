@@ -58,7 +58,7 @@ def load_data(file: str) -> SoilData:
 
 def calculate_wind_velocity(vv_avg: float, constants: dict[str, float]) -> float:
     """ Equation 47 speed of wind at 2m u_2 (m/2) """
-    velocity = vv_avg*(4.87/(log((67.8*constants['measure_height_c'])-5.42)))
+    velocity = vv_avg*(4.87/(log((67.8*int(constants['measure_height_c']))-5.42)))
     return velocity
 
 def calculate_saturate_steam(ta_max: float, ta_min: float) -> dict[str, float]:
