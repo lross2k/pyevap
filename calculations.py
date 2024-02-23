@@ -1,4 +1,5 @@
 from evapotranspiration import *
+from math import pi
 
 def print_iteration(ta_values: dict[str, float], hr_values: dict[str, float], 
                     vv_values: dict[str, float], rs_values: dict[str, float], 
@@ -35,6 +36,9 @@ def print_iteration(ta_values: dict[str, float], hr_values: dict[str, float],
     print(soil_heat_flux)
     print(evapotranspiration)
     print("Iteration data ending\n")
+
+def deg_2_rad(degrees: float) -> float:
+    return degrees*pi/180
 
 def example_iteration(constants: dict[str, float]) -> None:
     # Data obtained from file and processed

@@ -56,6 +56,9 @@ def load_data(file: str) -> SoilData:
             spreadsheet_data['PR'].append(float(cast(Any, row[6].value)))
     return(spreadsheet_data)
 
+def calculate_decimal_degrees(degrees: int, minutes: int, seconds: int) -> float:
+    return degrees+(minutes/60)+(seconds/3600)
+
 def calculate_wind_velocity(vv_avg: float, constants: dict[str, float]) -> float:
     """ Equation 47 speed of wind at 2m u_2 (m/2) """
     velocity = vv_avg*(4.87/(log((67.8*int(constants['measure_height_c']))-5.42)))
