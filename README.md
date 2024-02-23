@@ -2,23 +2,26 @@
 
 Small GUI tool
 
-# Installation
+# Setup
 
 ## Linux
 
 ```bash
-pacman -S tk
-python -m venv .
+python3 setup.py
+```
+
+## Windows
+
+```bat
+python setup.py
 ```
 
 ```bash
-./bin/pip install customtkinter
-./bin/pip install openpyxl
-./bin/pip install mypy
+./bin/pip install customtkinter openpyxl mypy
 ```
 
 # Type checking
 
 ```bash
-./bin/mypy --ignore-missing-imports --strict FILE
+./bin/python validate.py
 ```

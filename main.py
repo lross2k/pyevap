@@ -1,6 +1,6 @@
 from evapgui import Evap
 
-def main():
+def main() -> None:
     app = Evap()
     app.run()
 

@@ -2,6 +2,7 @@ import customtkinter
 import openpyxl
 from calculations import run_scenario
 from evapotranspiration import load_data, SoilData
+from typing import Callable, Any
 
 class Evap:
 
@@ -17,19 +18,17 @@ class Evap:
         # customtkinter.set_widget_scaling(float_value)  # widget dimensions and text size
         # customtkinter.set_window_scaling(float_value)  # window geometry dimensions
 
-        self.height_value: int           = 2129
-        self.albedo_value: float           = 0.23
-        self.solar_value: float            = 0.082
-        self.meassure_height_value: float  = 6.5
-
-        self.height_entry           = None
-        self.albedo_entry           = None
-        self.solar_entry            = None
-        self.meassure_height_entry  = None
-
         self.TKroot = customtkinter.CTk()
         self.TKroot.geometry("800x600")
         self.TKroot.title('PyEvap')
+
+        self.height_sv: customtkinter.StringVar            = customtkinter.StringVar(value=2129)
+        self.albedo_sv: customtkinter.StringVar            = customtkinter.StringVar(value=0.23)
+        self.solar_sv: customtkinter.StringVar             = customtkinter.StringVar(value=0.082)
+        self.meassure_height_sv: customtkinter.StringVar   = customtkinter.StringVar(value=6.5)
+        self.pressure_sv: customtkinter.StringVar          = customtkinter.StringVar(value=78.4)
+        self.psicrometric_sv: customtkinter.StringVar      = customtkinter.StringVar(value=0.05)
+
         self.input_frame = self.gen_input_frame()
         self.main_frame = self.gen_main_frame()
         self.main_frame.pack()
@@ -48,28 +47,25 @@ class Evap:
         # Values that must be entered by the user
         customtkinter.CTkLabel(input_frame, text='Input Page').grid(row=2, column=0, columnspan=2)
         left_localization_data = customtkinter.CTkFrame(input_frame, width=500)
-        self.height_entry = self.new_input_row(left_localization_data, 1, 'Altura', 'msnm', str(self.height_value))
-        self.albedo_entry = self.new_input_row(left_localization_data, 2, 'Albedo', '-', str(self.albedo_value))
-        self.solar_entry = self.new_input_row(left_localization_data, 3, 'Constante Solar', 'MJ/m^2 min', str(self.solar_value))
-        self.meassure_height_entry = self.new_input_row(left_localization_data, 4, 'Altura de medición', 'm', str(self.meassure_height_value))
-        print("just defined", self.meassure_height_entry.get())
+        self.new_input_row(left_localization_data, 1, 'Altura', 'msnm', self.height_sv, callback=self.height_callback)
+        self.new_input_row(left_localization_data, 2, 'Albedo', '-', self.albedo_sv)
+        self.new_input_row(left_localization_data, 3, 'Constante Solar', 'MJ/m^2 min', self.solar_sv)
+        self.new_input_row(left_localization_data, 4, 'Altura de medición', 'm', self.meassure_height_sv)
         left_localization_data.grid(row=3, column=0)
 
         right_localization_data = customtkinter.CTkFrame(input_frame)
-        self.new_input_row(right_localization_data, 1, 'Altura', 'msnm', "TODO")
-        self.new_input_row(right_localization_data, 2, 'Albedo', '-', "TODO")
-        self.new_input_row(right_localization_data, 3, 'Constante Solar', 'MJ/m^2 min', "TODO")
+        # Empty at the moment
         right_localization_data.grid(row=3, column=1)
 
         # Values defined from other values
         customtkinter.CTkLabel(input_frame, text='Valores calculados').grid(row=4, column=0, columnspan=2)
 
         left_calculated_data = customtkinter.CTkFrame(input_frame)
-        self.new_input_row(left_calculated_data, 1, 'Presión Atmosférica', 'kPa', "TODO")
+        self.new_input_row(left_calculated_data, 1, 'Presión Atmosférica', 'kPa', self.pressure_sv, disabled=True)
         left_calculated_data.grid(row=5, column=0)
 
         right_calculated_data = customtkinter.CTkFrame(input_frame)
-        self.new_input_row(right_calculated_data, 2, 'Constante psicrométrica (ϒ)', 'kPa /°C', "TODO")
+        self.new_input_row(right_calculated_data, 2, 'Constante psicrométrica (ϒ)', 'kPa /°C', self.psicrometric_sv, disabled=True)
         right_calculated_data.grid(row=5, column=1)
 
         # Values related to location
@@ -103,28 +99,19 @@ class Evap:
         return main_frame
 
     def run_scenario_example(self) -> None:
-        if self.meassure_height_entry.get():
-            self.meassure_height_value = float(self.meassure_height_entry.get())
-        if self.height_entry.get():
-            self.height_value = int(self.height_entry.get())
-        if self.albedo_entry.get():
-            self.albedo_value = float(self.albedo_entry.get())
-        if self.solar_entry.get():
-            self.solar_value = float(self.solar_entry.get())
-
         constants = {
-            'measure_height_c': self.meassure_height_value,
+            'measure_height_c': float(self.meassure_height_sv.get()),
             'latitude_rad_c': 0.173,
             'max_point_c': 12,
             'centre_logitude_deg_c': 90,
             'longitude_deg_c': 83.9,
-            'solar_c': self.solar_value,
-            'height_c': self.height_value,
-            'albedo_c': self.albedo_value,
+            'solar_c': float(self.solar_sv.get()),
+            'height_c': int(self.height_sv.get()),
+            'albedo_c': float(self.albedo_sv.get()),
             'steffan_c': (4.903*10**(-9))/24,
             'caloric_capacity_c': 2.1,
             'soil_depth_c': 0.1,
-            'psicrometric_c': 0.05
+            'psicrometric_c': float(self.psicrometric_sv.get())
         }
 
         start_date = {
@@ -143,13 +130,17 @@ class Evap:
 
         run_scenario(start_date, end_date, data, constants)
 
-    def new_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str, units: str, placeholder: str) -> customtkinter.CTkEntry:
+    def new_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str, units: str, text_var: customtkinter.StringVar, callback: Callable[[], Any] | None = None, disabled: bool = False) -> None:
         ''' Returns the handle to data entry that was created for the input row '''
         customtkinter.CTkLabel(frame, text=variable, padx=10, pady=10).grid(row=row, column=0)
-        entry = customtkinter.CTkEntry(frame, placeholder_text=placeholder)
+        if callback:
+            entry = customtkinter.CTkEntry(frame, textvariable=text_var, validate="key", validatecommand=callback)
+        else:
+            entry = customtkinter.CTkEntry(frame, textvariable=text_var)
+        if disabled:
+            entry.configure(state="disabled")
         entry.grid(row=row, column=1, columnspan=2)
         customtkinter.CTkLabel(frame, text=units, padx=10, pady=10).grid(row=row, column=3)
-        return entry
     
     def new_location_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str) -> list[customtkinter.CTkEntry]:
         ''' Returns the handle to 5 data entries that were created for the input row '''
@@ -187,3 +178,11 @@ class Evap:
         print(self.spreadsheet_data.keys())
         for index, item in self.spreadsheet_data.items():
             print(index, item)
+
+    def height_callback(self) -> bool:
+        height = self.height_sv.get()
+        if height != '' and height.isdigit():
+            calculated_value = 101.3*(((293-0.0065*int(height))/293)**5.26)
+            self.pressure_sv.set(calculated_value)
+            self.psicrometric_sv.set(0.665*10**(-3)*calculated_value)
+        return True
