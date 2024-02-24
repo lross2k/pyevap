@@ -1,9 +1,22 @@
+# Propietary binary files
 *.xlsx
 *.pdf
-__pycache__/
+
+# VSCode's config files
 .vscode/
+
+# Python's cache files
+__pycache__/
+
+# Python's mypy files
 .mypy_cache
+
+# Python's venv files
 bin/
 lib/
 lib64
 pyvenv.cfg
+
+# Vim's swap files
+*.swp
+

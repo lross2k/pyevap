@@ -7,7 +7,7 @@ Small GUI tool
 ## Linux
 
 ```bash
-python3 setup.py
+./setup
 ```
 
 ## Windows
@@ -16,12 +16,33 @@ python3 setup.py
 python setup.py
 ```
 
+# Running
+
 ```bash
-./bin/pip install customtkinter openpyxl mypy
+./setup
+```
+
+## Windows
+
+```bat
+python main.py
+```
+
+```bash
+./run
 ```
 
 # Type checking
 
+## Linux
+
+```bash
+./lint
+```
+
+## Windows
+
 ```bash
 ./bin/python validate.py
 ```
+

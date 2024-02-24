@@ -24,25 +24,28 @@ class Evap:
         self.TKroot.geometry("800x600")
         self.TKroot.title('PyEvap')
 
-        self.height_sv: StringVar           = StringVar(value=2129)
-        self.albedo_sv: StringVar           = StringVar(value=0.23)
-        self.solar_sv: StringVar            = StringVar(value=0.082)
-        self.meassure_height_sv: StringVar  = StringVar(value=6.5)
-        self.pressure_sv: StringVar         = StringVar(value=78.4)
-        self.psicrometric_sv: StringVar     = StringVar(value=0.05)
-        self.soil_depth_sv: StringVar       = StringVar(value=0.1)
-        self.caloric_capacity_sv: StringVar = StringVar(value=2.1)
-        self.highest_point_sv: StringVar    = StringVar(value=12)
-        self.lat_degrees_sv: StringVar      = StringVar(value=9)
-        self.lat_min_sv: StringVar          = StringVar(value=55)
-        self.lat_seconds_sv: StringVar      = StringVar(value=26)
-        self.lat_decimals_sv: StringVar     = StringVar(value=calculate_decimal_degrees(int(self.lat_degrees_sv.get()), int(self.lat_min_sv.get()), int(self.lat_seconds_sv.get())))
-        self.lat_rads_sv: StringVar         = StringVar(value=deg_2_rad(float(self.lat_decimals_sv.get())))
-        self.long_degrees_sv: StringVar     = StringVar(value=83)
-        self.long_min_sv: StringVar         = StringVar(value=53)
-        self.long_seconds_sv: StringVar     = StringVar(value=48)
-        self.long_decimals_sv: StringVar    = StringVar(value=calculate_decimal_degrees(int(self.long_degrees_sv.get()), int(self.long_min_sv.get()), int(self.long_seconds_sv.get())))
-        self.long_rads_sv: StringVar        = StringVar(value=deg_2_rad(float(self.long_decimals_sv.get())))
+        self.dummy_sv: StringVar                = StringVar(value="")
+        self.height_sv: StringVar               = StringVar(value=2129)
+        self.albedo_sv: StringVar               = StringVar(value=0.23)
+        self.solar_sv: StringVar                = StringVar(value=0.082)
+        self.meassure_height_sv: StringVar      = StringVar(value=6.5)
+        self.pressure_sv: StringVar             = StringVar(value=78.4)
+        self.psicrometric_sv: StringVar         = StringVar(value=0.05)
+        self.soil_depth_sv: StringVar           = StringVar(value=0.1)
+        self.caloric_capacity_sv: StringVar     = StringVar(value=2.1)
+        self.highest_point_sv: StringVar        = StringVar(value=12)
+        self.lat_degrees_sv: StringVar          = StringVar(value=9)
+        self.lat_min_sv: StringVar              = StringVar(value=55)
+        self.lat_seconds_sv: StringVar          = StringVar(value=26)
+        self.lat_decimals_sv: StringVar         = StringVar(value=calculate_decimal_degrees(int(self.lat_degrees_sv.get()), int(self.lat_min_sv.get()), int(self.lat_seconds_sv.get())))
+        self.lat_rads_sv: StringVar             = StringVar(value=deg_2_rad(float(self.lat_decimals_sv.get())))
+        self.long_degrees_sv: StringVar         = StringVar(value=83)
+        self.long_min_sv: StringVar             = StringVar(value=53)
+        self.long_seconds_sv: StringVar         = StringVar(value=48)
+        self.long_decimals_sv: StringVar        = StringVar(value=calculate_decimal_degrees(int(self.long_degrees_sv.get()), int(self.long_min_sv.get()), int(self.long_seconds_sv.get())))
+        self.long_rads_sv: StringVar            = StringVar(value=deg_2_rad(float(self.long_decimals_sv.get())))
+        self.center_long_decimals_sv: StringVar = StringVar(value=90)
+        self.center_long_rads_sv: StringVar     = StringVar(value=deg_2_rad(float(self.center_long_decimals_sv.get())))
 
         self.input_frame = self.gen_input_frame()
         self.main_frame = self.gen_main_frame()
@@ -90,9 +93,9 @@ class Evap:
         customtkinter.CTkLabel(input_frame, text='Ubicación').grid(row=6, column=0, columnspan=2)
         location_data = customtkinter.CTkScrollableFrame(input_frame, width=800, height=150, orientation='horizontal')
 
-        customtkinter.CTkLabel(location_data, text='Dirección',         padx=10, pady=10).grid(row=0, column=1)
-        customtkinter.CTkLabel(location_data, text='Grados',            padx=10, pady=10).grid(row=0, column=2)
-        customtkinter.CTkLabel(location_data, text='Minutos',           padx=10, pady=10).grid(row=0, column=3)
+        customtkinter.CTkLabel(location_data, text='Grados',            padx=10, pady=10).grid(row=0, column=1)
+        customtkinter.CTkLabel(location_data, text='Minutos',           padx=10, pady=10).grid(row=0, column=2)
+        customtkinter.CTkLabel(location_data, text='Segundos',          padx=10, pady=10).grid(row=0, column=3)
         customtkinter.CTkLabel(location_data, text='Grados decimales',  padx=10, pady=10).grid(row=0, column=4)
         customtkinter.CTkLabel(location_data, text='Radianes',          padx=10, pady=10).grid(row=0, column=5)
 
@@ -102,9 +105,10 @@ class Evap:
         self.new_location_input_row(location_data, 2, 'Longitud (Lm)', self.long_degrees_sv, self.long_min_sv, self.long_seconds_sv,
                                     self.long_decimals_sv, self.long_rads_sv, self.location_long_callback, False, False, False,
                                     True, True)
-        self.new_location_input_row(location_data, 3, 'Longitud centro (Lz)', None, None, None,
-                                    None, None, None, True, True, True,
-                                    False, False)
+        self.new_location_input_row(location_data, 3, 'Longitud centro (Lz)', self.dummy_sv, self.dummy_sv, self.dummy_sv,
+                                    self.center_long_decimals_sv, self.center_long_rads_sv,
+                                    self.center_long_callback, True, True, True,
+                                    False, True)
 
         location_data.grid(row=7, column=0, columnspan=2)
         return input_frame
@@ -126,7 +130,7 @@ class Evap:
             'measure_height_c': float(self.meassure_height_sv.get()),
             'latitude_rad_c': float(self.lat_rads_sv.get()),
             'max_point_c': int(self.highest_point_sv.get()),
-            'centre_logitude_deg_c': 90,
+            'centre_logitude_deg_c': float(self.center_long_decimals_sv.get()),
             'longitude_deg_c': float(self.long_decimals_sv.get()),
             'solar_c': float(self.solar_sv.get()),
             'height_c': int(self.height_sv.get()),
@@ -168,25 +172,35 @@ class Evap:
         customtkinter.CTkLabel(frame, text=units, padx=10, pady=10).grid(row=row, column=2)
 
     def new_location_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str,
-                               first_sv: StringVar | None, second_sv: StringVar | None,
-                               third_sv: StringVar | None, fourth_sv: StringVar | None,
-                               fifth_sv: StringVar | None, callback: Callable[[], Any] | None,
-                               first_status: bool, second_status: bool, third_status: bool,
-                               fourth_status: bool, fifth_status: bool) -> list[customtkinter.CTkEntry]:
+                               first_sv: StringVar, second_sv: StringVar, third_sv: StringVar, 
+                               fourth_sv: StringVar, fifth_sv: StringVar, 
+                               callback: Callable[[], Any] | None, first_status: bool, 
+                               second_status: bool, third_status: bool, fourth_status: bool, 
+                               fifth_status: bool) -> None:
         ''' Returns the handle to 5 data entries that were created for the input row '''
         customtkinter.CTkLabel(frame, text=variable, padx=5, pady=10).grid(row=row, column=0)
-        # TODO
-        entry1 = customtkinter.CTkEntry(frame, placeholder_text="valor")
-        entry2 = customtkinter.CTkEntry(frame, placeholder_text="valor")
-        entry3 = customtkinter.CTkEntry(frame, placeholder_text="valor")
-        entry4 = customtkinter.CTkEntry(frame, placeholder_text="valor")
-        entry5 = customtkinter.CTkEntry(frame, placeholder_text="valor")
+        if callback:
+            entry1 = customtkinter.CTkEntry(frame, textvariable=first_sv, validate="key", validatecommand=callback)
+            entry2 = customtkinter.CTkEntry(frame, textvariable=second_sv, validate="key", validatecommand=callback)
+            entry3 = customtkinter.CTkEntry(frame, textvariable=third_sv, validate="key", validatecommand=callback)
+            entry4 = customtkinter.CTkEntry(frame, textvariable=fourth_sv, validate="key", validatecommand=callback)
+            entry5 = customtkinter.CTkEntry(frame, textvariable=fifth_sv, validate="key", validatecommand=callback)
+        else:
+            entry1 = customtkinter.CTkEntry(frame, textvariable=first_sv)
+            entry2 = customtkinter.CTkEntry(frame, textvariable=second_sv)
+            entry3 = customtkinter.CTkEntry(frame, textvariable=third_sv)
+            entry4 = customtkinter.CTkEntry(frame, textvariable=fourth_sv)
+            entry5 = customtkinter.CTkEntry(frame, textvariable=fifth_sv)
         entry1.grid(row=row, column=1)
         entry2.grid(row=row, column=2)
         entry3.grid(row=row, column=3)
         entry4.grid(row=row, column=4)
         entry5.grid(row=row, column=5)
-        return [entry1, entry2, entry3, entry4, entry5]
+        if first_status: entry1.configure(state="disabled")
+        if second_status: entry2.configure(state="disabled")
+        if third_status: entry3.configure(state="disabled")
+        if fourth_status: entry4.configure(state="disabled")
+        if fifth_status: entry5.configure(state="disabled")
 
     def raise_main_menu(self) -> None:
         self.input_frame.pack_forget()
@@ -224,8 +238,8 @@ class Evap:
         lat_seconds = self.lat_seconds_sv.get()
         if lat_degrees != '' and lat_degrees.isdigit() and lat_minutes != '' and lat_minutes.isdigit() and lat_seconds != '' and lat_seconds.isdigit():
             decimal_degrees = calculate_decimal_degrees(int(lat_degrees), int(lat_minutes), int(lat_seconds))
-            self.lat_decimals_sv.set(decimal_degrees)
-            self.lat_rads_sv.set(deg_2_rad(decimal_degrees))
+            self.lat_decimals_sv.set("%.2f" % (decimal_degrees))
+            self.lat_rads_sv.set("%.2f" % (deg_2_rad(decimal_degrees)))
         return True
 
     def location_long_callback(self) -> bool:
@@ -234,6 +248,13 @@ class Evap:
         long_seconds = self.long_seconds_sv.get()
         if long_degrees != '' and long_degrees.isdigit() and long_minutes != '' and long_minutes.isdigit() and long_seconds != '' and long_seconds.isdigit():
             decimal_degrees = calculate_decimal_degrees(int(long_degrees), int(long_minutes), int(long_seconds))
-            self.long_decimals_sv.set(decimal_degrees)
-            self.long_rads_sv.set(deg_2_rad(decimal_degrees))
+            self.long_decimals_sv.set("%.2f" % (decimal_degrees))
+            self.long_rads_sv.set("%.2f" % (deg_2_rad(decimal_degrees)))
         return True
+
+    def center_long_callback(self) -> bool:
+        center_long_decimals: str = self.center_long_decimals_sv.get()
+        if center_long_decimals != '' and center_long_decimals.isdigit():
+            self.center_long_rads_sv.set("%.2f" % (deg_2_rad(float(center_long_decimals))))
+        return True
+
