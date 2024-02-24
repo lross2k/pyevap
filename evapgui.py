@@ -12,7 +12,8 @@ class Evap:
         customtkinter.set_default_color_theme('evap.json')
 
         # Appearance
-        customtkinter.set_appearance_mode('system') # 'system' doesn't work on Linux yet, however it works on my GNOME 40
+        customtkinter.set_appearance_mode('system') # 'system' doesn't work on Linux yet, however it
+        # works on my GNOME 40, and my KDE Plasma
 
         # Scaling
         # customtkinter.deactivate_automatic_dpi_awareness()
