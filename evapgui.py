@@ -6,7 +6,6 @@ from evapotranspiration import load_data, SoilData, calculate_decimal_degrees
 from typing import Callable, Any
 
 class Evap:
-
     def __init__(self) -> None:
         # Setting the custom theme for the app
         customtkinter.set_default_color_theme('evap.json')
@@ -257,4 +256,3 @@ class Evap:
         if center_long_decimals != '' and center_long_decimals.isdigit():
             self.center_long_rads_sv.set("%.2f" % (deg_2_rad(float(center_long_decimals))))
         return True
-

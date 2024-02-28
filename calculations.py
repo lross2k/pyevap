@@ -37,6 +37,68 @@ def print_iteration(ta_values: dict[str, float], hr_values: dict[str, float],
     print(evapotranspiration)
     print("Iteration data ending\n")
 
+def append_with_separator(source: str, destination: str) -> str:
+    transformed: str = destination
+    transformed = transformed + ";" + source
+    return transformed
+
+def stringify_iteration(ta_values: dict[str, float], hr_values: dict[str, float],
+                    vv_values: dict[str, float], rs_values: dict[str, float],
+                    pr_values: dict[str, float], wind_velocity: float,
+                    saturation_slope: float, sat_steam: dict[str, float],
+                    p_real: float, steam_pressure_deficit: float,
+                    solar_radiation: float, julian_day: float,
+                    relative_distance:float , solar_declination: float,
+                    hourly_radicion_angle: dict[str, float],
+                    extraterrestrial_radiation: float, max_duration: float,
+                    r_so: float, radiations: dict[str, float],
+                    soil_heat_flux: float, evapotranspiration: float,
+                    year: int, month: int, day: int, amount_of_days: int) -> str:
+    final_string: str = f'{month}/{day}/{year}'
+    final_string = append_with_separator(str(amount_of_days), final_string)
+    final_string = append_with_separator("%.3f" % (ta_values['avg']), final_string)
+    final_string = append_with_separator("%.3f" % (hr_values['avg']), final_string)
+    final_string = append_with_separator("%.3f" % (vv_values['avg']), final_string)
+    final_string = append_with_separator("%.3f" % (rs_values['avg']), final_string)
+    final_string = append_with_separator("%.3f" % (pr_values['avg']), final_string)
+    final_string = append_with_separator("%.3f" % (ta_values['min']), final_string)
+    final_string = append_with_separator("%.3f" % (hr_values['min']), final_string)
+    final_string = append_with_separator("%.3f" % (vv_values['min']), final_string)
+    final_string = append_with_separator("%.3f" % (rs_values['min']), final_string)
+    final_string = append_with_separator("%.3f" % (pr_values['min']), final_string)
+    final_string = append_with_separator("%.3f" % (ta_values['max']), final_string)
+    final_string = append_with_separator("%.3f" % (hr_values['max']), final_string)
+    final_string = append_with_separator("%.3f" % (vv_values['max']), final_string)
+    final_string = append_with_separator("%.3f" % (rs_values['max']), final_string)
+    final_string = append_with_separator("%.3f" % (pr_values['max']), final_string)
+    final_string = append_with_separator("%.3f" % (wind_velocity), final_string)
+    final_string = append_with_separator("%.3f" % (sat_steam['e_t_max']), final_string)
+    final_string = append_with_separator("%.3f" % (sat_steam['e_t_min']), final_string)
+    final_string = append_with_separator("%.3f" % (sat_steam['avg_p']), final_string)
+    final_string = append_with_separator("%.3f" % (saturation_slope), final_string)
+    final_string = append_with_separator("%.3f" % (p_real), final_string)
+    final_string = append_with_separator("%.3f" % (steam_pressure_deficit), final_string)
+    final_string = append_with_separator("%.3f" % (solar_radiation), final_string)
+    final_string = append_with_separator("%.3f" % (julian_day), final_string)
+    final_string = append_with_separator("%.3f" % (relative_distance), final_string)
+    final_string = append_with_separator("%.3f" % (solar_declination), final_string)
+    final_string = append_with_separator("%.3f" % (hourly_radicion_angle['value_b']), final_string)
+    final_string = append_with_separator("%.3f" % (hourly_radicion_angle['seccional_correction']), final_string)
+    final_string = append_with_separator("%.3f" % (hourly_radicion_angle['sunset']), final_string)
+    final_string = append_with_separator("%.3f" % (hourly_radicion_angle['sun_middle_point']), final_string)
+    final_string = append_with_separator("%.3f" % (hourly_radicion_angle['start']), final_string)
+    final_string = append_with_separator("%.3f" % (hourly_radicion_angle['end']), final_string)
+    final_string = append_with_separator("%.3f" % (extraterrestrial_radiation), final_string)
+    final_string = append_with_separator("%.3f" % (max_duration), final_string)
+    final_string = append_with_separator("%.3f" % (r_so), final_string)
+    final_string = append_with_separator("%.3f" % (radiations['short_wave']), final_string)
+    final_string = append_with_separator("%.3f" % (radiations['relative']), final_string)
+    final_string = append_with_separator("%.3f" % (radiations['long_wave']), final_string)
+    final_string = append_with_separator("%.3f" % (radiations['net']), final_string)
+    final_string = append_with_separator("%.3f" % (soil_heat_flux), final_string)
+    final_string = append_with_separator("%.3f" % (evapotranspiration), final_string)
+    return final_string
+
 def deg_2_rad(degrees: float) -> float:
     return degrees*pi/180
 
@@ -124,7 +186,8 @@ def run_scenario(start_date: dict[str, int], end_date: dict[str, int], data: Soi
                 soil_heat_flux = calculate_soil_heat_flux(constants, ta_values['avg'], prev_ta_avg, amount_of_days)
                 evapotranspiration = calculate_evapotranspiration(saturation_slope, radiations['net'], soil_heat_flux, wind_velocity, ta_values['avg'], steam_pressure_deficit, constants)
 
-                print_iteration(ta_values, hr_values, vv_values, rs_values, pr_values, wind_velocity, saturation_slope, sat_steam, p_real, steam_pressure_deficit, solar_radiation, julian_day, relative_distance, solar_declination, hourly_radicion_angle, extraterrestrial_radiation, max_duration, r_so, radiations, soil_heat_flux, evapotranspiration, year, month, day, amount_of_days)
+                #print_iteration(ta_values, hr_values, vv_values, rs_values, pr_values, wind_velocity, saturation_slope, sat_steam, p_real, steam_pressure_deficit, solar_radiation, julian_day, relative_distance, solar_declination, hourly_radicion_angle, extraterrestrial_radiation, max_duration, r_so, radiations, soil_heat_flux, evapotranspiration, year, month, day, amount_of_days)
+                print(stringify_iteration(ta_values, hr_values, vv_values, rs_values, pr_values, wind_velocity, saturation_slope, sat_steam, p_real, steam_pressure_deficit, solar_radiation, julian_day, relative_distance, solar_declination, hourly_radicion_angle, extraterrestrial_radiation, max_duration, r_so, radiations, soil_heat_flux, evapotranspiration, year, month, day, amount_of_days))
 
                 prev_ta_avg = ta_values['avg']
 
