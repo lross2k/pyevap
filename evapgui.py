@@ -45,6 +45,12 @@ class Evap:
         self.long_rads_sv: StringVar            = StringVar(value=deg_2_rad(float(self.long_decimals_sv.get())))
         self.center_long_decimals_sv: StringVar = StringVar(value=90)
         self.center_long_rads_sv: StringVar     = StringVar(value=deg_2_rad(float(self.center_long_decimals_sv.get())))
+        self.start_date_year_sv: StringVar      = StringVar(value=2019)
+        self.start_date_month_sv: StringVar     = StringVar(value=12)
+        self.start_date_day_sv: StringVar       = StringVar(value=1)
+        self.end_date_year_sv: StringVar        = StringVar(value=2019)
+        self.end_date_month_sv: StringVar       = StringVar(value=12)
+        self.end_date_day_sv: StringVar         = StringVar(value=3)
 
         self.input_frame = self.gen_input_frame()
         self.main_frame = self.gen_main_frame()
@@ -110,6 +116,21 @@ class Evap:
                                     False, True)
 
         location_data.grid(row=7, column=0, columnspan=2)
+
+        date_data = customtkinter.CTkFrame(input_frame)
+        customtkinter.CTkLabel(date_data, text="Día", padx=10, pady=10).grid(row=0, column=1)
+        customtkinter.CTkLabel(date_data, text="Mes", padx=10, pady=10).grid(row=0, column=2)
+        customtkinter.CTkLabel(date_data, text="Año", padx=10, pady=10).grid(row=0, column=3)
+        customtkinter.CTkLabel(date_data, text="Inicio", padx=10, pady=10).grid(row=1, column=0)
+        customtkinter.CTkEntry(date_data, textvariable=self.start_date_day_sv).grid(row=1, column=1, columnspan=1)
+        customtkinter.CTkEntry(date_data, textvariable=self.start_date_month_sv).grid(row=1, column=2, columnspan=1)
+        customtkinter.CTkEntry(date_data, textvariable=self.start_date_year_sv).grid(row=1, column=3, columnspan=1)
+        customtkinter.CTkLabel(date_data, text="Fin", padx=10, pady=10).grid(row=2, column=0)
+        customtkinter.CTkEntry(date_data, textvariable=self.end_date_day_sv).grid(row=2, column=1, columnspan=1)
+        customtkinter.CTkEntry(date_data, textvariable=self.end_date_month_sv).grid(row=2, column=2, columnspan=1)
+        customtkinter.CTkEntry(date_data, textvariable=self.end_date_year_sv).grid(row=2, column=3, columnspan=1)
+        date_data.grid(row=9, column=0)
+
         return input_frame
 
     def gen_main_frame(self) -> customtkinter.CTkFrame:
@@ -140,16 +161,16 @@ class Evap:
             'psicrometric_c': float(self.psicrometric_sv.get())
         }
 
-        start_date = {
-            'month': 12,
-            'day': 1,
-            'year': 2019
+        start_date: dict[str, str] = {
+            'month': self.start_date_month_sv.get(),
+            'day': self.start_date_day_sv.get(),
+            'year': self.start_date_year_sv.get()
         }
 
-        end_date = {
-            'month': 12,
-            'day': 3,
-            'year': 2019
+        end_date: dict[str, str] = {
+            'month': self.end_date_month_sv.get(),
+            'day': self.end_date_day_sv.get(),
+            'year': self.end_date_year_sv.get()
         }
 
         data = self.spreadsheet_data
