@@ -1,9 +1,10 @@
-import customtkinter
-from customtkinter import StringVar
-import openpyxl
-from calculations import run_scenario, deg_2_rad
 from evapotranspiration import load_data, SoilData, calculate_decimal_degrees
+from calculations import run_scenario, deg_2_rad
+from customtkinter import StringVar
 from typing import Callable, Any
+import customtkinter
+import openpyxl
+import csv
 
 class Evap:
     def __init__(self) -> None:
@@ -53,55 +54,48 @@ class Evap:
         self.end_date_day_sv: StringVar         = StringVar(value=3)
 
         self.input_frame = self.gen_input_frame()
-        self.main_frame = self.gen_main_frame()
+        [self.main_frame, self.result_frame] = self.gen_main_frame()
         self.main_frame.pack()
         self.spreadsheet_data: SoilData = {'date': [], 'H': [], 'TA': [], 'HR': [], 'VV': [], 'RS': [], 'PR': []}
 
     def run(self) -> None:
-        self.raise_main_menu()
+        self.raise_input_menu()
         self.TKroot.mainloop()
 
     def gen_input_frame(self) -> customtkinter.CTkFrame:
         # Input frame basis
         input_frame = customtkinter.CTkFrame(self.TKroot)
-        customtkinter.CTkLabel(input_frame, text='Input Page').grid(row=0, column=0, columnspan=2)
-        customtkinter.CTkButton(input_frame, text='Back to Main Page', command=self.raise_main_menu).grid(row=1, column=0, columnspan=2)
 
         # Values that must be entered by the user
-        customtkinter.CTkLabel(input_frame, text='Input Page').grid(row=2, column=0, columnspan=2)
+        #customtkinter.CTkLabel(input_frame, text='Input Page').grid(row=2, column=0, columnspan=2)
         left_localization_data = customtkinter.CTkFrame(input_frame)
         self.new_input_row(left_localization_data, 1, 'Altura', 'msnm', self.height_sv, callback=self.height_callback)
         self.new_input_row(left_localization_data, 2, 'Albedo', '-', self.albedo_sv)
         self.new_input_row(left_localization_data, 3, 'Constante Solar', 'MJ/m^2 min', self.solar_sv)
         self.new_input_row(left_localization_data, 4, 'Altura de medición', 'm', self.meassure_height_sv)
-        left_localization_data.grid(row=3, column=0)
+        left_localization_data.grid(row=1, column=0, sticky='nswe')
 
         right_localization_data = customtkinter.CTkFrame(input_frame)
         self.new_input_row(right_localization_data, 1, 't=punto máximo', '-', self.highest_point_sv)
         self.new_input_row(right_localization_data, 2, 'Capacidad calorífica', 'MJ m-3 °C-1', self.caloric_capacity_sv)
         self.new_input_row(right_localization_data, 3, 'Δz=profundida del suelo', 'm', self.soil_depth_sv)
-
-        right_localization_data.grid(row=3, column=1)
+        right_localization_data.grid(row=1, column=1, sticky='nswe')
 
         # Values defined from other values
-        customtkinter.CTkLabel(input_frame, text='Valores calculados').grid(row=4, column=0, columnspan=2)
+        customtkinter.CTkLabel(input_frame, text='Valores calculados').grid(row=2, column=0, columnspan=1, sticky='w')
 
-        left_calculated_data = customtkinter.CTkFrame(input_frame)
-        self.new_input_row(left_calculated_data, 1, 'Presión Atmosférica', 'kPa', self.pressure_sv, disabled=True)
-        left_calculated_data.grid(row=5, column=0)
-
-        right_calculated_data = customtkinter.CTkFrame(input_frame)
-        self.new_input_row(right_calculated_data, 2, 'Constante psicrométrica (ϒ)', 'kPa /°C', self.psicrometric_sv, disabled=True)
-        right_calculated_data.grid(row=5, column=1)
+        calculated_data = customtkinter.CTkFrame(input_frame)
+        self.new_input_row(calculated_data, 0, 'Presión Atmosférica', 'kPa', self.pressure_sv, disabled=True)
+        self.new_input_row(calculated_data, 1, 'Constante psicrométrica (ϒ)', 'kPa /°C', self.psicrometric_sv, disabled=True)
+        calculated_data.grid(row=3, column=0, sticky='nswe')
 
         # Values related to location
-        customtkinter.CTkLabel(input_frame, text='Ubicación').grid(row=6, column=0, columnspan=2)
-        location_data = customtkinter.CTkScrollableFrame(input_frame, width=800, height=150, orientation='horizontal')
-
+        customtkinter.CTkLabel(input_frame, text='Ubicación').grid(row=4, column=0, columnspan=1)
+        location_data = customtkinter.CTkFrame(input_frame, width=800, height=150)
         customtkinter.CTkLabel(location_data, text='Grados',            padx=10, pady=10).grid(row=0, column=1)
         customtkinter.CTkLabel(location_data, text='Minutos',           padx=10, pady=10).grid(row=0, column=2)
         customtkinter.CTkLabel(location_data, text='Segundos',          padx=10, pady=10).grid(row=0, column=3)
-        customtkinter.CTkLabel(location_data, text='Grados decimales',  padx=10, pady=10).grid(row=0, column=4)
+        customtkinter.CTkLabel(location_data, text='Grados decimales',  padx=0, pady=10).grid(row=0, column=4)
         customtkinter.CTkLabel(location_data, text='Radianes',          padx=10, pady=10).grid(row=0, column=5)
 
         self.new_location_input_row(location_data, 1, 'Latitud (φ)', self.lat_degrees_sv, self.lat_min_sv, self.lat_seconds_sv,
@@ -114,36 +108,39 @@ class Evap:
                                     self.center_long_decimals_sv, self.center_long_rads_sv,
                                     self.center_long_callback, True, True, True,
                                     False, True)
+        location_data.grid(row=5, column=0, columnspan=2, sticky='nswe')
 
-        location_data.grid(row=7, column=0, columnspan=2)
-
+        # Date data frame
         date_data = customtkinter.CTkFrame(input_frame)
         customtkinter.CTkLabel(date_data, text="Día", padx=10, pady=10).grid(row=0, column=1)
         customtkinter.CTkLabel(date_data, text="Mes", padx=10, pady=10).grid(row=0, column=2)
         customtkinter.CTkLabel(date_data, text="Año", padx=10, pady=10).grid(row=0, column=3)
         customtkinter.CTkLabel(date_data, text="Inicio", padx=10, pady=10).grid(row=1, column=0)
-        customtkinter.CTkEntry(date_data, textvariable=self.start_date_day_sv).grid(row=1, column=1, columnspan=1)
-        customtkinter.CTkEntry(date_data, textvariable=self.start_date_month_sv).grid(row=1, column=2, columnspan=1)
-        customtkinter.CTkEntry(date_data, textvariable=self.start_date_year_sv).grid(row=1, column=3, columnspan=1)
+        customtkinter.CTkEntry(date_data, textvariable=self.start_date_day_sv, width=50).grid(row=1, column=1, columnspan=1)
+        customtkinter.CTkEntry(date_data, textvariable=self.start_date_month_sv, width=50).grid(row=1, column=2, columnspan=1)
+        customtkinter.CTkEntry(date_data, textvariable=self.start_date_year_sv, width=50).grid(row=1, column=3, columnspan=1)
         customtkinter.CTkLabel(date_data, text="Fin", padx=10, pady=10).grid(row=2, column=0)
-        customtkinter.CTkEntry(date_data, textvariable=self.end_date_day_sv).grid(row=2, column=1, columnspan=1)
-        customtkinter.CTkEntry(date_data, textvariable=self.end_date_month_sv).grid(row=2, column=2, columnspan=1)
-        customtkinter.CTkEntry(date_data, textvariable=self.end_date_year_sv).grid(row=2, column=3, columnspan=1)
-        date_data.grid(row=9, column=0)
+        customtkinter.CTkEntry(date_data, textvariable=self.end_date_day_sv, width=50).grid(row=2, column=1, columnspan=1)
+        customtkinter.CTkEntry(date_data, textvariable=self.end_date_month_sv, width=50).grid(row=2, column=2, columnspan=1)
+        customtkinter.CTkEntry(date_data, textvariable=self.end_date_year_sv, width=50).grid(row=2, column=3, columnspan=1)
+        date_data.grid(row=3, column=1, sticky='nswe')
+
+        customtkinter.CTkButton(input_frame, text='Ir a calculos', command=self.raise_result_menu).grid(row=6, column=0, sticky='nswe')
 
         return input_frame
 
-    def gen_main_frame(self) -> customtkinter.CTkFrame:
+    def gen_main_frame(self) -> list[customtkinter.CTkFrame]:
         main_frame = customtkinter.CTkFrame(self.TKroot)
-        customtkinter.CTkLabel(main_frame, text='Main Page').grid(row=0, column=0)
-        customtkinter.CTkButton(main_frame, text='Go to Input Frame', command=self.raise_input).grid(row=1, column=0)
-        main_frame.rowconfigure(0, weight=1)
-        main_frame.rowconfigure(1, weight=1)
-        main_frame.columnconfigure(0, weight=1)
-        customtkinter.CTkButton(main_frame, text='Ttes', command=self.check_saved_data).grid(row=2, column=0, columnspan=2)
-        customtkinter.CTkButton(main_frame, text='Calculate', command=self.run_scenario_example).grid(row=4, column=1, columnspan=2)
-        customtkinter.CTkButton(main_frame, text='Load data', command=self.get_test_data).grid(row=3, column=0, columnspan=2)
-        return main_frame
+        #customtkinter.CTkLabel(main_frame, text='Main Page').grid(row=0, column=0)
+        customtkinter.CTkButton(main_frame, text='Cambiar parametros', command=self.raise_input_menu).grid(row=1, column=0)
+        #main_frame.rowconfigure(0, weight=1)
+        #main_frame.rowconfigure(1, weight=1)
+        #main_frame.columnconfigure(0, weight=1)
+        customtkinter.CTkButton(main_frame, text='Seleccionar datos', command=self.get_test_data).grid(row=1, column=1, columnspan=1)
+        customtkinter.CTkButton(main_frame, text='Calcular', command=self.run_scenario_example).grid(row=1, column=2, columnspan=1)
+        result_frame = customtkinter.CTkScrollableFrame(main_frame, width=800, height=500, orientation='horizontal')
+        result_frame.grid(row=2, column=0, columnspan=3)
+        return main_frame, result_frame
 
     def run_scenario_example(self) -> None:
         constants = {
@@ -176,6 +173,7 @@ class Evap:
         data = self.spreadsheet_data
 
         run_scenario(start_date, end_date, data, constants)
+        self.get_data_from_cache()
 
     def new_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str, units: str,
                       text_var: customtkinter.StringVar, callback: Callable[[], Any] | None = None,
@@ -183,9 +181,9 @@ class Evap:
         ''' Returns the handle to data entry that was created for the input row '''
         customtkinter.CTkLabel(frame, text=variable, padx=10, pady=10).grid(row=row, column=0)
         if callback:
-            entry = customtkinter.CTkEntry(frame, textvariable=text_var, validate="key", validatecommand=callback)
+            entry = customtkinter.CTkEntry(frame, textvariable=text_var, validate="key", validatecommand=callback, width=50)
         else:
-            entry = customtkinter.CTkEntry(frame, textvariable=text_var)
+            entry = customtkinter.CTkEntry(frame, textvariable=text_var, width=50)
         if disabled:
             entry.configure(state="disabled")
         entry.grid(row=row, column=1, columnspan=1)
@@ -200,17 +198,17 @@ class Evap:
         ''' Returns the handle to 5 data entries that were created for the input row '''
         customtkinter.CTkLabel(frame, text=variable, padx=5, pady=10).grid(row=row, column=0)
         if callback:
-            entry1 = customtkinter.CTkEntry(frame, textvariable=first_sv, validate="key", validatecommand=callback)
-            entry2 = customtkinter.CTkEntry(frame, textvariable=second_sv, validate="key", validatecommand=callback)
-            entry3 = customtkinter.CTkEntry(frame, textvariable=third_sv, validate="key", validatecommand=callback)
-            entry4 = customtkinter.CTkEntry(frame, textvariable=fourth_sv, validate="key", validatecommand=callback)
-            entry5 = customtkinter.CTkEntry(frame, textvariable=fifth_sv, validate="key", validatecommand=callback)
+            entry1 = customtkinter.CTkEntry(frame, textvariable=first_sv, validate="key", validatecommand=callback, width=100)
+            entry2 = customtkinter.CTkEntry(frame, textvariable=second_sv, validate="key", validatecommand=callback, width=100)
+            entry3 = customtkinter.CTkEntry(frame, textvariable=third_sv, validate="key", validatecommand=callback, width=100)
+            entry4 = customtkinter.CTkEntry(frame, textvariable=fourth_sv, validate="key", validatecommand=callback, width=100)
+            entry5 = customtkinter.CTkEntry(frame, textvariable=fifth_sv, validate="key", validatecommand=callback, width=100)
         else:
-            entry1 = customtkinter.CTkEntry(frame, textvariable=first_sv)
-            entry2 = customtkinter.CTkEntry(frame, textvariable=second_sv)
-            entry3 = customtkinter.CTkEntry(frame, textvariable=third_sv)
-            entry4 = customtkinter.CTkEntry(frame, textvariable=fourth_sv)
-            entry5 = customtkinter.CTkEntry(frame, textvariable=fifth_sv)
+            entry1 = customtkinter.CTkEntry(frame, textvariable=first_sv, width=100)
+            entry2 = customtkinter.CTkEntry(frame, textvariable=second_sv, width=100)
+            entry3 = customtkinter.CTkEntry(frame, textvariable=third_sv, width=100)
+            entry4 = customtkinter.CTkEntry(frame, textvariable=fourth_sv, width=100)
+            entry5 = customtkinter.CTkEntry(frame, textvariable=fifth_sv, width=100)
         entry1.grid(row=row, column=1)
         entry2.grid(row=row, column=2)
         entry3.grid(row=row, column=3)
@@ -222,11 +220,11 @@ class Evap:
         if fourth_status: entry4.configure(state="disabled")
         if fifth_status: entry5.configure(state="disabled")
 
-    def raise_main_menu(self) -> None:
-        self.input_frame.pack_forget()
+    def raise_result_menu(self) -> None:
         self.main_frame.pack()
+        self.input_frame.pack_forget()
 
-    def raise_input(self) -> None:
+    def raise_input_menu(self) -> None:
         self.main_frame.pack_forget()
         self.input_frame.pack()
 
@@ -277,3 +275,14 @@ class Evap:
         if center_long_decimals != '' and center_long_decimals.isdigit():
             self.center_long_rads_sv.set("%.2f" % (deg_2_rad(float(center_long_decimals))))
         return True
+
+    def get_data_from_cache(self) -> None:
+        with open('.cache.csv', newline='\n') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
+            for row_index, row in enumerate(spamreader):
+                row_frame = customtkinter.CTkFrame(self.result_frame)
+                for col_index in range(len(row)):
+                    entry = customtkinter.CTkEntry(row_frame, textvariable=customtkinter.StringVar(value=row[col_index]), width=100)
+                    entry.grid(row=row_index+2, column=col_index)
+                    entry.configure(state="disabled")
+                row_frame.grid(row=row_index+2, column=2)

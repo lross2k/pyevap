@@ -6,6 +6,17 @@ def append_with_separator(source: str, destination: str) -> str:
     transformed = transformed + ";" + source
     return transformed
 
+def save_to_cache(data: list[str]) -> None:
+    first_header: str = ";;Valores promedios;;;;;Valores mínimos;;;;;Valores máximos;;;;;Velocidad;Vapor de Saturación;;;Pendiente;Presión real de vapor derivada de la humedad realtiva;Déficit de ;RS (Rs );Dia;Distancia ;Declinación ;Ángulo de radición horario;;;;;;Radiación extraterrestre;Duración máxima;R so;Radiación ;Radiación;Radiación ;Radiación;Flujo de calor del suelo;Cálculo de ET"
+    second_header: str = "Día;Número de días;TA;HR;VV;RS (Rs );PR;TA;HR;VV;RS (Rs );PR;TA;HR;VV;RS (Rs );PR;Viento a 2 m;e°(Tmax);e°(Tmin);Presión media;Curva de sarturación;presión real;presión de vapor;Radiación solar ;juliano;relativa;solar;Valor ;Correción seccional;puesta de sol;sol punto medio;inicio;final;Ra;Insolación;día despejado;onda corta (Rns);relativa;onda larga (Rnl);neta (Rn);G;ET"
+    third_header: str = ";;grados C;%;m/s;W/m2;grados C;grados C;%;m/s;W/m2;grados C;grados C;%;m/s;W/m2;grados C;u2 (m/2);kPa;kPa;es (kPa);Δ (kPa/ C°1);ea (kPa);es - ea (kPa);MJ/ m^(2)* dia;J;dr;δ;b;Sc;ωs ;ω;ω1;ω2;MJ /m^(2) *dia;N;MJ/ m^(2)* dia;MJ/ m^(2)*día;Rs/Rso;MJ/ m^(2) *día;MJ/ m^(2) *dia;MJ/ m^(2)*dia;mm/dia"
+    with open('.cache.csv', 'w') as cache_file:
+        cache_file.write(first_header+'\n')
+        cache_file.write(second_header+'\n')
+        cache_file.write(third_header+'\n')
+        for line in data:
+            cache_file.write(line+'\n')
+
 def stringify_iteration(ta_values: dict[str, float], hr_values: dict[str, float],
                     vv_values: dict[str, float], rs_values: dict[str, float],
                     pr_values: dict[str, float], wind_velocity: float,
@@ -137,4 +148,4 @@ def run_scenario(input_start_date: dict[str, str], input_end_date: dict[str, str
 
     for result in csv_results:
         print(result)
-
+    save_to_cache(csv_results)
