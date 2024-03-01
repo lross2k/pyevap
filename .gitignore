@@ -13,6 +13,7 @@ __pycache__/
 
 # Python's venv files
 scripts/
+include/
 bin/
 lib/
 lib64
