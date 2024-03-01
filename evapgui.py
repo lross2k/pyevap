@@ -277,7 +277,7 @@ class Evap:
         return True
 
     def get_data_from_cache(self) -> None:
-        with open('.cache.csv', newline='\n') as csvfile:
+        with open('.cache.csv', newline='\n', encoding='utf-8') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
             for row_index, row in enumerate(spamreader):
                 row_frame = customtkinter.CTkFrame(self.result_frame)
