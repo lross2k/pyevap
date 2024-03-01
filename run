@@ -1,3 +1,2 @@
 #! /bin/bash
-./bin/python main.py
-
+./bin/python main.py modern

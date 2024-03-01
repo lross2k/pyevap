@@ -1,26 +1,31 @@
 from evapotranspiration import load_data, SoilData, calculate_decimal_degrees
 from calculations import run_scenario, deg_2_rad
-from customtkinter import StringVar
+from tkinter import StringVar
 from typing import Callable, Any
-import customtkinter
+import tkinter as tk
 import openpyxl
 import csv
 
-class Evap:
+class ScrolledCanvas():
+    def __init__(self, root):
+        canv = tk.Canvas(root, relief=tk.SUNKEN)
+        canv.config(width=800, height=500)
+
+        canv.config(scrollregion=(0,0,5400, 500))
+        canv.config(highlightthickness=0)
+
+        xbar = tk.Scrollbar(root, orient='horizontal')
+        xbar.config(command=canv.xview)
+        canv.config(xscrollcommand=xbar.set)
+        xbar.pack(side=tk.BOTTOM, fill=tk.X)
+        canv.pack(side=tk.LEFT, expand=tk.YES, fill=tk.BOTH)
+        self.canv = canv
+    def get_canv(self):
+        return self.canv
+
+class EvapTk:
     def __init__(self) -> None:
-        # Setting the custom theme for the app
-        customtkinter.set_default_color_theme('evap.json')
-
-        # Appearance
-        customtkinter.set_appearance_mode('system') # 'system' doesn't work on Linux yet, however it
-        # works on my GNOME 40, and my KDE Plasma
-
-        # Scaling
-        # customtkinter.deactivate_automatic_dpi_awareness()
-        # customtkinter.set_widget_scaling(float_value)  # widget dimensions and text size
-        # customtkinter.set_window_scaling(float_value)  # window geometry dimensions
-
-        self.TKroot = customtkinter.CTk()
+        self.TKroot = tk.Tk()
         self.TKroot.geometry("800x600")
         self.TKroot.title('PyEvap')
 
@@ -62,41 +67,41 @@ class Evap:
         self.raise_input_menu()
         self.TKroot.mainloop()
 
-    def gen_input_frame(self) -> customtkinter.CTkFrame:
+    def gen_input_frame(self) -> tk.Frame:
         # Input frame basis
-        input_frame = customtkinter.CTkFrame(self.TKroot)
+        input_frame = tk.Frame(self.TKroot)
 
         # Values that must be entered by the user
-        #customtkinter.CTkLabel(input_frame, text='Input Page').grid(row=2, column=0, columnspan=2)
-        left_localization_data = customtkinter.CTkFrame(input_frame)
+        #tk.Label(input_frame, text='Input Page').grid(row=2, column=0, columnspan=2)
+        left_localization_data = tk.Frame(input_frame)
         self.new_input_row(left_localization_data, 1, 'Altura', 'msnm', self.height_sv, callback=self.height_callback)
         self.new_input_row(left_localization_data, 2, 'Albedo', '-', self.albedo_sv)
         self.new_input_row(left_localization_data, 3, 'Constante Solar', 'MJ/m^2 min', self.solar_sv)
         self.new_input_row(left_localization_data, 4, 'Altura de medición', 'm', self.meassure_height_sv)
         left_localization_data.grid(row=1, column=0, sticky='nswe')
 
-        right_localization_data = customtkinter.CTkFrame(input_frame)
+        right_localization_data = tk.Frame(input_frame)
         self.new_input_row(right_localization_data, 1, 't=punto máximo', '-', self.highest_point_sv)
         self.new_input_row(right_localization_data, 2, 'Capacidad calorífica', 'MJ m-3 °C-1', self.caloric_capacity_sv)
         self.new_input_row(right_localization_data, 3, 'Δz=profundida del suelo', 'm', self.soil_depth_sv)
         right_localization_data.grid(row=1, column=1, sticky='nswe')
 
         # Values defined from other values
-        customtkinter.CTkLabel(input_frame, text='Valores calculados').grid(row=2, column=0, columnspan=1, sticky='w')
+        tk.Label(input_frame, text='Valores calculados').grid(row=2, column=0, columnspan=1, sticky='w')
 
-        calculated_data = customtkinter.CTkFrame(input_frame)
+        calculated_data = tk.Frame(input_frame)
         self.new_input_row(calculated_data, 0, 'Presión Atmosférica', 'kPa', self.pressure_sv, disabled=True)
         self.new_input_row(calculated_data, 1, 'Constante psicrométrica (ϒ)', 'kPa /°C', self.psicrometric_sv, disabled=True)
         calculated_data.grid(row=3, column=0, sticky='nswe')
 
         # Values related to location
-        customtkinter.CTkLabel(input_frame, text='Ubicación').grid(row=4, column=0, columnspan=1)
-        location_data = customtkinter.CTkFrame(input_frame, width=800, height=150)
-        customtkinter.CTkLabel(location_data, text='Grados',            padx=10, pady=10).grid(row=0, column=1)
-        customtkinter.CTkLabel(location_data, text='Minutos',           padx=10, pady=10).grid(row=0, column=2)
-        customtkinter.CTkLabel(location_data, text='Segundos',          padx=10, pady=10).grid(row=0, column=3)
-        customtkinter.CTkLabel(location_data, text='Grados decimales',  padx=0, pady=10).grid(row=0, column=4)
-        customtkinter.CTkLabel(location_data, text='Radianes',          padx=10, pady=10).grid(row=0, column=5)
+        tk.Label(input_frame, text='Ubicación').grid(row=4, column=0, columnspan=1)
+        location_data = tk.Frame(input_frame, width=800, height=150)
+        tk.Label(location_data, text='Grados',            padx=10, pady=10).grid(row=0, column=1)
+        tk.Label(location_data, text='Minutos',           padx=10, pady=10).grid(row=0, column=2)
+        tk.Label(location_data, text='Segundos',          padx=10, pady=10).grid(row=0, column=3)
+        tk.Label(location_data, text='Grados decimales',  padx=0, pady=10).grid(row=0, column=4)
+        tk.Label(location_data, text='Radianes',          padx=10, pady=10).grid(row=0, column=5)
 
         self.new_location_input_row(location_data, 1, 'Latitud (φ)', self.lat_degrees_sv, self.lat_min_sv, self.lat_seconds_sv,
                                     self.lat_decimals_sv, self.lat_rads_sv, self.location_lat_callback, False, False, False,
@@ -111,35 +116,39 @@ class Evap:
         location_data.grid(row=5, column=0, columnspan=2, sticky='nswe')
 
         # Date data frame
-        date_data = customtkinter.CTkFrame(input_frame)
-        customtkinter.CTkLabel(date_data, text="Día", padx=10, pady=10).grid(row=0, column=1)
-        customtkinter.CTkLabel(date_data, text="Mes", padx=10, pady=10).grid(row=0, column=2)
-        customtkinter.CTkLabel(date_data, text="Año", padx=10, pady=10).grid(row=0, column=3)
-        customtkinter.CTkLabel(date_data, text="Inicio", padx=10, pady=10).grid(row=1, column=0)
-        customtkinter.CTkEntry(date_data, textvariable=self.start_date_day_sv, width=50).grid(row=1, column=1, columnspan=1)
-        customtkinter.CTkEntry(date_data, textvariable=self.start_date_month_sv, width=50).grid(row=1, column=2, columnspan=1)
-        customtkinter.CTkEntry(date_data, textvariable=self.start_date_year_sv, width=50).grid(row=1, column=3, columnspan=1)
-        customtkinter.CTkLabel(date_data, text="Fin", padx=10, pady=10).grid(row=2, column=0)
-        customtkinter.CTkEntry(date_data, textvariable=self.end_date_day_sv, width=50).grid(row=2, column=1, columnspan=1)
-        customtkinter.CTkEntry(date_data, textvariable=self.end_date_month_sv, width=50).grid(row=2, column=2, columnspan=1)
-        customtkinter.CTkEntry(date_data, textvariable=self.end_date_year_sv, width=50).grid(row=2, column=3, columnspan=1)
+        date_data = tk.Frame(input_frame)
+        tk.Label(date_data, text="Día", padx=10, pady=10).grid(row=0, column=1)
+        tk.Label(date_data, text="Mes", padx=10, pady=10).grid(row=0, column=2)
+        tk.Label(date_data, text="Año", padx=10, pady=10).grid(row=0, column=3)
+        tk.Label(date_data, text="Inicio", padx=10, pady=10).grid(row=1, column=0)
+        tk.Entry(date_data, textvariable=self.start_date_day_sv, width=15).grid(row=1, column=1, columnspan=1)
+        tk.Entry(date_data, textvariable=self.start_date_month_sv, width=15).grid(row=1, column=2, columnspan=1)
+        tk.Entry(date_data, textvariable=self.start_date_year_sv, width=15).grid(row=1, column=3, columnspan=1)
+        tk.Label(date_data, text="Fin", padx=10, pady=10).grid(row=2, column=0)
+        tk.Entry(date_data, textvariable=self.end_date_day_sv, width=15).grid(row=2, column=1, columnspan=1)
+        tk.Entry(date_data, textvariable=self.end_date_month_sv, width=15).grid(row=2, column=2, columnspan=1)
+        tk.Entry(date_data, textvariable=self.end_date_year_sv, width=15).grid(row=2, column=3, columnspan=1)
         date_data.grid(row=3, column=1, sticky='nswe')
 
-        customtkinter.CTkButton(input_frame, text='Ir a calculos', command=self.raise_result_menu).grid(row=6, column=0, sticky='nswe')
+        tk.Button(input_frame, text='Ir a calculos', command=self.raise_result_menu).grid(row=6, column=0, sticky='nswe')
 
         return input_frame
 
-    def gen_main_frame(self) -> list[customtkinter.CTkFrame]:
-        main_frame = customtkinter.CTkFrame(self.TKroot)
-        #customtkinter.CTkLabel(main_frame, text='Main Page').grid(row=0, column=0)
-        customtkinter.CTkButton(main_frame, text='Cambiar parametros', command=self.raise_input_menu).grid(row=1, column=1)
+    def gen_main_frame(self) -> list[tk.Frame]:
+        main_frame = tk.Frame(self.TKroot)
+        #tk.Label(main_frame, text='Main Page').grid(row=0, column=0)
+        tk.Button(main_frame, text='Cambiar parametros', command=self.raise_input_menu).pack()
         #main_frame.rowconfigure(0, weight=1)
         #main_frame.rowconfigure(1, weight=1)
         #main_frame.columnconfigure(0, weight=1)
-        customtkinter.CTkButton(main_frame, text='Seleccionar datos', command=self.get_test_data).grid(row=2, column=1, columnspan=1)
-        customtkinter.CTkButton(main_frame, text='Calcular', command=self.run_scenario_example).grid(row=3, column=1, columnspan=1)
-        result_frame = customtkinter.CTkScrollableFrame(main_frame, width=800, height=500, orientation='horizontal')
-        result_frame.grid(row=4, column=0, columnspan=3)
+        tk.Button(main_frame, text='Seleccionar datos', command=self.get_test_data).pack()
+        tk.Button(main_frame, text='Calcular', command=self.run_scenario_example).pack()
+        # used to be scrollable
+        #result_frame = tk.ScrollableFrame(main_frame, width=800, height=500, orientation='horizontal')
+        #result_frame = tk.Frame(main_frame, width=800, height=500)
+        budget_scroll_frame = ScrolledCanvas(main_frame)
+        result_frame = budget_scroll_frame.get_canv()
+        #result_frame.grid(row=2, column=0, columnspan=3)
         return main_frame, result_frame
 
     def run_scenario_example(self) -> None:
@@ -175,40 +184,40 @@ class Evap:
         run_scenario(start_date, end_date, data, constants)
         self.get_data_from_cache()
 
-    def new_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str, units: str,
-                      text_var: customtkinter.StringVar, callback: Callable[[], Any] | None = None,
+    def new_input_row(self, frame: tk.Frame, row: int, variable: str, units: str,
+                      text_var: tk.StringVar, callback: Callable[[], Any] | None = None,
                       disabled: bool = False) -> None:
         ''' Returns the handle to data entry that was created for the input row '''
-        customtkinter.CTkLabel(frame, text=variable, padx=10, pady=10).grid(row=row, column=0)
+        tk.Label(frame, text=variable, padx=10, pady=10).grid(row=row, column=0)
         if callback:
-            entry = customtkinter.CTkEntry(frame, textvariable=text_var, validate="key", validatecommand=callback, width=50)
+            entry = tk.Entry(frame, textvariable=text_var, validate="key", validatecommand=callback, width=15)
         else:
-            entry = customtkinter.CTkEntry(frame, textvariable=text_var, width=50)
+            entry = tk.Entry(frame, textvariable=text_var, width=15)
         if disabled:
             entry.configure(state="disabled")
         entry.grid(row=row, column=1, columnspan=1)
-        customtkinter.CTkLabel(frame, text=units, padx=10, pady=10).grid(row=row, column=2)
+        tk.Label(frame, text=units, padx=10, pady=10).grid(row=row, column=2)
 
-    def new_location_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str,
+    def new_location_input_row(self, frame: tk.Frame, row: int, variable: str,
                                first_sv: StringVar, second_sv: StringVar, third_sv: StringVar, 
                                fourth_sv: StringVar, fifth_sv: StringVar, 
                                callback: Callable[[], Any] | None, first_status: bool, 
                                second_status: bool, third_status: bool, fourth_status: bool, 
                                fifth_status: bool) -> None:
         ''' Returns the handle to 5 data entries that were created for the input row '''
-        customtkinter.CTkLabel(frame, text=variable, padx=5, pady=10).grid(row=row, column=0)
+        tk.Label(frame, text=variable, padx=5, pady=10).grid(row=row, column=0)
         if callback:
-            entry1 = customtkinter.CTkEntry(frame, textvariable=first_sv, validate="key", validatecommand=callback, width=100)
-            entry2 = customtkinter.CTkEntry(frame, textvariable=second_sv, validate="key", validatecommand=callback, width=100)
-            entry3 = customtkinter.CTkEntry(frame, textvariable=third_sv, validate="key", validatecommand=callback, width=100)
-            entry4 = customtkinter.CTkEntry(frame, textvariable=fourth_sv, validate="key", validatecommand=callback, width=100)
-            entry5 = customtkinter.CTkEntry(frame, textvariable=fifth_sv, validate="key", validatecommand=callback, width=100)
+            entry1 = tk.Entry(frame, textvariable=first_sv, validate="key", validatecommand=callback, width=15)
+            entry2 = tk.Entry(frame, textvariable=second_sv, validate="key", validatecommand=callback, width=15)
+            entry3 = tk.Entry(frame, textvariable=third_sv, validate="key", validatecommand=callback, width=15)
+            entry4 = tk.Entry(frame, textvariable=fourth_sv, validate="key", validatecommand=callback, width=15)
+            entry5 = tk.Entry(frame, textvariable=fifth_sv, validate="key", validatecommand=callback, width=15)
         else:
-            entry1 = customtkinter.CTkEntry(frame, textvariable=first_sv, width=100)
-            entry2 = customtkinter.CTkEntry(frame, textvariable=second_sv, width=100)
-            entry3 = customtkinter.CTkEntry(frame, textvariable=third_sv, width=100)
-            entry4 = customtkinter.CTkEntry(frame, textvariable=fourth_sv, width=100)
-            entry5 = customtkinter.CTkEntry(frame, textvariable=fifth_sv, width=100)
+            entry1 = tk.Entry(frame, textvariable=first_sv, width=15)
+            entry2 = tk.Entry(frame, textvariable=second_sv, width=15)
+            entry3 = tk.Entry(frame, textvariable=third_sv, width=15)
+            entry4 = tk.Entry(frame, textvariable=fourth_sv, width=15)
+            entry5 = tk.Entry(frame, textvariable=fifth_sv, width=15)
         entry1.grid(row=row, column=1)
         entry2.grid(row=row, column=2)
         entry3.grid(row=row, column=3)
@@ -230,7 +239,7 @@ class Evap:
 
     def get_test_data(self) -> None:
         ''' Obtains data from file selected by user in the openfiledialog '''
-        file = customtkinter.filedialog.askopenfilename(title='Abrir archivo con datos', 
+        file = tk.filedialog.askopenfilename(title='Abrir archivo con datos',
             filetypes=[('Excel', '*.xlsx'), ('Excel macros', '*.xlsm'), ('CSV', '*.csv')])
         if not file:
             print('Empty file handle')
@@ -280,9 +289,8 @@ class Evap:
         with open('.cache.csv', newline='\n') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
             for row_index, row in enumerate(spamreader):
-                row_frame = customtkinter.CTkFrame(self.result_frame)
+                row_frame = tk.Frame(self.result_frame)
                 for col_index in range(len(row)):
-                    entry = customtkinter.CTkEntry(row_frame, textvariable=customtkinter.StringVar(value=row[col_index]), width=100)
-                    entry.grid(row=row_index+2, column=col_index)
-                    entry.configure(state="disabled")
-                row_frame.grid(row=row_index+2, column=2)
+                    frm = tk.Frame(self.result_frame,width=960, height=100, bd=2, relief=tk.SUNKEN)
+                    tk.Label(frm, text=row[col_index], anchor=tk.NW, bg="white", width=15).grid()
+                    self.result_frame.create_window(10+(125*col_index),10+(35*row_index), anchor=tk.NW, window=frm)
