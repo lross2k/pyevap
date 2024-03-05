@@ -7,7 +7,7 @@ import openpyxl
 import csv
 
 class ScrolledCanvas():
-    def __init__(self, root):
+    def __init__(self, root: tk.Frame) -> None:
         canv = tk.Canvas(root, relief=tk.SUNKEN)
         canv.config(width=800, height=500)
 
@@ -20,7 +20,8 @@ class ScrolledCanvas():
         xbar.pack(side=tk.BOTTOM, fill=tk.X)
         canv.pack(side=tk.LEFT, expand=tk.YES, fill=tk.BOTH)
         self.canv = canv
-    def get_canv(self):
+
+    def get_canv(self) -> tk.Canvas:
         return self.canv
 
 class EvapTk:
@@ -30,36 +31,36 @@ class EvapTk:
         self.TKroot.title('PyEvap')
 
         self.dummy_sv: StringVar                = StringVar(value="")
-        self.height_sv: StringVar               = StringVar(value=2129)
-        self.albedo_sv: StringVar               = StringVar(value=0.23)
-        self.solar_sv: StringVar                = StringVar(value=0.082)
-        self.meassure_height_sv: StringVar      = StringVar(value=6.5)
-        self.pressure_sv: StringVar             = StringVar(value=78.4)
-        self.psicrometric_sv: StringVar         = StringVar(value=0.05)
-        self.soil_depth_sv: StringVar           = StringVar(value=0.1)
-        self.caloric_capacity_sv: StringVar     = StringVar(value=2.1)
-        self.highest_point_sv: StringVar        = StringVar(value=12)
-        self.lat_degrees_sv: StringVar          = StringVar(value=9)
-        self.lat_min_sv: StringVar              = StringVar(value=55)
-        self.lat_seconds_sv: StringVar          = StringVar(value=26)
-        self.lat_decimals_sv: StringVar         = StringVar(value=calculate_decimal_degrees(int(self.lat_degrees_sv.get()), int(self.lat_min_sv.get()), int(self.lat_seconds_sv.get())))
-        self.lat_rads_sv: StringVar             = StringVar(value=deg_2_rad(float(self.lat_decimals_sv.get())))
-        self.long_degrees_sv: StringVar         = StringVar(value=83)
-        self.long_min_sv: StringVar             = StringVar(value=53)
-        self.long_seconds_sv: StringVar         = StringVar(value=48)
-        self.long_decimals_sv: StringVar        = StringVar(value=calculate_decimal_degrees(int(self.long_degrees_sv.get()), int(self.long_min_sv.get()), int(self.long_seconds_sv.get())))
-        self.long_rads_sv: StringVar            = StringVar(value=deg_2_rad(float(self.long_decimals_sv.get())))
-        self.center_long_decimals_sv: StringVar = StringVar(value=90)
-        self.center_long_rads_sv: StringVar     = StringVar(value=deg_2_rad(float(self.center_long_decimals_sv.get())))
-        self.start_date_year_sv: StringVar      = StringVar(value=2019)
-        self.start_date_month_sv: StringVar     = StringVar(value=12)
-        self.start_date_day_sv: StringVar       = StringVar(value=1)
-        self.end_date_year_sv: StringVar        = StringVar(value=2019)
-        self.end_date_month_sv: StringVar       = StringVar(value=12)
-        self.end_date_day_sv: StringVar         = StringVar(value=3)
+        self.height_sv: StringVar               = StringVar(value="2129")
+        self.albedo_sv: StringVar               = StringVar(value="0.23")
+        self.solar_sv: StringVar                = StringVar(value="0.082")
+        self.meassure_height_sv: StringVar      = StringVar(value="6.5")
+        self.pressure_sv: StringVar             = StringVar(value="78.4")
+        self.psicrometric_sv: StringVar         = StringVar(value="0.05")
+        self.soil_depth_sv: StringVar           = StringVar(value="0.1")
+        self.caloric_capacity_sv: StringVar     = StringVar(value="2.1")
+        self.highest_point_sv: StringVar        = StringVar(value="12")
+        self.lat_degrees_sv: StringVar          = StringVar(value="9")
+        self.lat_min_sv: StringVar              = StringVar(value="55")
+        self.lat_seconds_sv: StringVar          = StringVar(value="26")
+        self.lat_decimals_sv: StringVar         = StringVar(value=str(calculate_decimal_degrees(int(self.lat_degrees_sv.get()), int(self.lat_min_sv.get()), int(self.lat_seconds_sv.get()))))
+        self.lat_rads_sv: StringVar             = StringVar(value=str(deg_2_rad(float(self.lat_decimals_sv.get()))))
+        self.long_degrees_sv: StringVar         = StringVar(value="83")
+        self.long_min_sv: StringVar             = StringVar(value="53")
+        self.long_seconds_sv: StringVar         = StringVar(value="48")
+        self.long_decimals_sv: StringVar        = StringVar(value=str(calculate_decimal_degrees(int(self.long_degrees_sv.get()), int(self.long_min_sv.get()), int(self.long_seconds_sv.get()))))
+        self.long_rads_sv: StringVar            = StringVar(value=str(deg_2_rad(float(self.long_decimals_sv.get()))))
+        self.center_long_decimals_sv: StringVar = StringVar(value="90")
+        self.center_long_rads_sv: StringVar     = StringVar(value=str(deg_2_rad(float(self.center_long_decimals_sv.get()))))
+        self.start_date_year_sv: StringVar      = StringVar(value="2019")
+        self.start_date_month_sv: StringVar     = StringVar(value="12")
+        self.start_date_day_sv: StringVar       = StringVar(value="1")
+        self.end_date_year_sv: StringVar        = StringVar(value="2019")
+        self.end_date_month_sv: StringVar       = StringVar(value="12")
+        self.end_date_day_sv: StringVar         = StringVar(value="3")
 
         self.input_frame = self.gen_input_frame()
-        [self.main_frame, self.result_frame] = self.gen_main_frame()
+        self.main_frame, self.result_frame = self.gen_main_frame()
         self.main_frame.pack()
         self.spreadsheet_data: SoilData = {'date': [], 'H': [], 'TA': [], 'HR': [], 'VV': [], 'RS': [], 'PR': []}
 
@@ -134,7 +135,7 @@ class EvapTk:
 
         return input_frame
 
-    def gen_main_frame(self) -> list[tk.Frame]:
+    def gen_main_frame(self) -> tuple[tk.Frame, tk.Canvas]:
         main_frame = tk.Frame(self.TKroot)
         #tk.Label(main_frame, text='Main Page').grid(row=0, column=0)
         tk.Button(main_frame, text='Cambiar parametros', command=self.raise_input_menu).pack()

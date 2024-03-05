@@ -129,7 +129,7 @@ class Evap:
 
         return input_frame
 
-    def gen_main_frame(self) -> list[customtkinter.CTkFrame]:
+    def gen_main_frame(self) -> tuple[customtkinter.CTkFrame, customtkinter.CTkFrame]:
         main_frame = customtkinter.CTkFrame(self.TKroot)
         #customtkinter.CTkLabel(main_frame, text='Main Page').grid(row=0, column=0)
         customtkinter.CTkButton(main_frame, text='Cambiar parametros', command=self.raise_input_menu).grid(row=1, column=1)
