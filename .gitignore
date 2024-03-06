@@ -24,3 +24,8 @@ pyvenv.cfg
 
 # Test data cache
 .cache.csv
+
+# Build files
+build/
+dist/
+*.exe

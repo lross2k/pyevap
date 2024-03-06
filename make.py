@@ -32,6 +32,12 @@ def main() -> None:
             os.system(platform_path('./bin/python operations.py legacy', os_name))
         case 'modern':                                               
             os.system(platform_path('./bin/python operations.py modern', os_name))
+        case 'build':
+            # Building only supported for Windows at the moment
+            os.system('.\Scripts\pip install pyinstaller')
+            os.system('.\Scripts\pyinstaller.exe --onefile --noconsole evapgui.py')
+            os.system('.\Scripts\pyinstaller.exe --onefile --noconsole evapguitk.py')
+            pass
 
 if __name__ == '__main__':
     main()

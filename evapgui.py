@@ -300,3 +300,7 @@ class Evap:
             print('Empty file handle')
             return
         save_result_to_system(file)
+
+if __name__ == '__main__':
+    app: Evap = Evap()
+    app.run()
