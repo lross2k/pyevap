@@ -35,6 +35,8 @@ def main() -> None:
         case 'build':
             # Building only supported for Windows at the moment
             os.system('.\Scripts\pip install pyinstaller')
+            os.system('rm -r build')
+            os.system('rm -r dist')
             os.system('.\Scripts\pyinstaller.exe --onefile --noconsole evapgui.py')
             os.system('.\Scripts\pyinstaller.exe --onefile --noconsole evapguitk.py')
             pass

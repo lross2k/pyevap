@@ -1,8 +1,8 @@
-import openpyxl
+from math import fsum, log, exp, cos, pi, sin, acos, tan, sqrt
 from typing import TypedDict, Sequence, Any, cast
 from collections import defaultdict
 from datetime import datetime, time
-from math import fsum, log, exp, cos, pi, sin, acos, tan, sqrt
+import openpyxl
 
 class SoilData(TypedDict):
     date:   list[datetime]

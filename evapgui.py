@@ -10,7 +10,7 @@ import csv
 class Evap:
     def __init__(self) -> None:
         # Setting the custom theme for the app
-        customtkinter.set_default_color_theme('evap.json')
+        customtkinter.set_default_color_theme('dark-blue')
 
         # Appearance
         customtkinter.set_appearance_mode('system') # 'system' doesn't work on Linux yet, however it
@@ -174,8 +174,11 @@ class Evap:
 
         data = self.spreadsheet_data
 
-        run_scenario(start_date, end_date, data, constants)
-        self.get_data_from_cache()
+        result = run_scenario(start_date, end_date, data, constants)
+        if result:
+            self.get_data_from_cache()
+        else:
+            self.open_popup()
 
     def new_input_row(self, frame: customtkinter.CTkFrame, row: int, variable: str, units: str,
                       text_var: customtkinter.StringVar, callback: Callable[[], Any] | None = None,
@@ -300,6 +303,12 @@ class Evap:
             print('Empty file handle')
             return
         save_result_to_system(file)
+        
+    def open_popup(self) -> None:
+        top = customtkinter.Toplevel(self.TKroot)
+        top.geometry("250x150")
+        top.title("Error")
+        customtkinter.Label(top, text= "No se han seleccionado datos!").place(x=40,y=55)
 
 if __name__ == '__main__':
     app: Evap = Evap()

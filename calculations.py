@@ -67,7 +67,7 @@ def stringify_iteration(ta_values: dict[str, float], hr_values: dict[str, float]
 def deg_2_rad(degrees: float) -> float:
     return degrees*pi/180.0
 
-def run_scenario(input_start_date: dict[str, str], input_end_date: dict[str, str], data: SoilData, constants: dict[str, float], interval: int = 0) -> None:
+def run_scenario(input_start_date: dict[str, str], input_end_date: dict[str, str], data: SoilData, constants: dict[str, float], interval: int = 0) -> bool:
     indexed_data = index_by_date(data['date'])
 
     start_date: dict[str, int] = {
@@ -82,7 +82,10 @@ def run_scenario(input_start_date: dict[str, str], input_end_date: dict[str, str
         'day': data['date'][-1].day if input_end_date['day'] == "" else int(input_end_date['day'])
     }
 
-    # Validate the entered date in a feasible range
+    if len(data['date']) <= 0:
+        print('No base data')
+        return False
+
     if start_date['year'] < data['date'][0].year or start_date['month'] < data['date'][0].year or (start_date['day'] < data['date'][0].day if start_date['year'] == data['date'][0].year and start_date['month'] == data['date'][0].month else False):
         print('adjusting start date')
         start_date['year'] = data['date'][0].year
@@ -137,3 +140,4 @@ def run_scenario(input_start_date: dict[str, str], input_end_date: dict[str, str
                 prev_ta_avg = ta_values['avg']
 
     save_temp_to_system(csv_results)
+    return True

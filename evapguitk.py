@@ -184,8 +184,11 @@ class EvapTk:
 
         data = self.spreadsheet_data
 
-        run_scenario(start_date, end_date, data, constants)
-        self.get_data_from_cache()
+        result = run_scenario(start_date, end_date, data, constants)
+        if result:
+            self.get_data_from_cache()
+        else:
+            self.open_popup()
 
     def new_input_row(self, frame: tk.Frame, row: int, variable: str, units: str,
                       text_var: tk.StringVar, callback: Callable[[], Any] | None = None,
@@ -309,6 +312,12 @@ class EvapTk:
             print('Empty file handle')
             return
         save_result_to_system(file)
+
+    def open_popup(self) -> None:
+        top = tk.Toplevel(self.TKroot)
+        top.geometry("250x150")
+        top.title("Error")
+        tk.Label(top, text= "No se han seleccionado datos!").place(x=40,y=55)
 
 if __name__ == '__main__':
     app: EvapTk = EvapTk()
