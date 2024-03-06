@@ -6,6 +6,7 @@ from typing import Callable, Any
 import customtkinter
 import openpyxl
 import csv
+import tkinter as tk
 
 class Evap:
     def __init__(self) -> None:
@@ -305,10 +306,10 @@ class Evap:
         save_result_to_system(file)
         
     def open_popup(self) -> None:
-        top = customtkinter.Toplevel(self.TKroot)
+        top = customtkinter.CTkToplevel(self.TKroot)
         top.geometry("250x150")
         top.title("Error")
-        customtkinter.Label(top, text= "No se han seleccionado datos!").place(x=40,y=55)
+        customtkinter.CTkLabel(top, text= "No se han seleccionado datos!").place(x=40,y=55)
 
 if __name__ == '__main__':
     app: Evap = Evap()
