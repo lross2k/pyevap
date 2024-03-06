@@ -1,6 +1,7 @@
 from evapotranspiration import load_data, SoilData, calculate_decimal_degrees
+from common import save_result_to_system, get_cache_file_path
 from calculations import run_scenario, deg_2_rad
-from tkinter import StringVar
+from tkinter import StringVar, filedialog
 from typing import Callable, Any
 import tkinter as tk
 import openpyxl
@@ -132,6 +133,7 @@ class EvapTk:
         date_data.grid(row=3, column=1, sticky='nswe')
 
         tk.Button(input_frame, text='Ir a calculos', command=self.raise_result_menu).grid(row=6, column=0, sticky='nswe')
+        tk.Button(input_frame, text='Guardar resultados', command=self.save_results).grid(row=6, column=1, sticky='nswe')
 
         return input_frame
 
@@ -287,7 +289,11 @@ class EvapTk:
         return True
 
     def get_data_from_cache(self) -> None:
-        with open('.cache.csv', newline='\n', encoding='utf-8') as csvfile:
+        cache_path: str | None = get_cache_file_path()
+        if not cache_path:
+            print('Can\'t reach cache file, it may not exist')
+            return
+        with open(cache_path, newline='\n', encoding='utf-8') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
             for row_index, row in enumerate(spamreader):
                 row_frame = tk.Frame(self.result_frame)
@@ -295,3 +301,11 @@ class EvapTk:
                     frm = tk.Frame(self.result_frame,width=960, height=100, bd=2, relief=tk.SUNKEN)
                     tk.Label(frm, text=row[col_index], anchor=tk.NW, bg="white", width=15).grid()
                     self.result_frame.create_window(10+(125*col_index),10+(35*row_index), anchor=tk.NW, window=frm)
+
+    def save_results(self) -> None:
+        file = filedialog.asksaveasfilename(title='Seleccionar archivo',
+            filetypes=[('CSV', '*.csv')])
+        if not file:
+            print('Empty file handle')
+            return
+        save_result_to_system(file)
