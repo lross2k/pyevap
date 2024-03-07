@@ -35,10 +35,14 @@ def main() -> None:
         case 'build':
             # Building only supported for Windows at the moment
             os.system('.\Scripts\pip install pyinstaller')
-            os.system('rm -r build')
-            os.system('rm -r dist')
-            os.system('.\Scripts\pyinstaller.exe --onefile --noconsole evapgui.py')
-            os.system('.\Scripts\pyinstaller.exe --onefile --noconsole evapguitk.py')
+            os.system('RMDIR \S\Q build')
+            os.system('RMDIR \S\Q dist')
+            if len(args) > 1 and args[1] == 'folder':
+                os.system('.\Scripts\pyinstaller.exe --noconsole evapgui.py')
+                os.system('.\Scripts\pyinstaller.exe --noconsole evapguitk.py')
+            else:
+                os.system('.\Scripts\pyinstaller.exe --onefile --noconsole evapgui.py')
+                os.system('.\Scripts\pyinstaller.exe --onefile --noconsole evapguitk.py')
             pass
 
 if __name__ == '__main__':
